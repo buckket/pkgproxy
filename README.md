@@ -1,11 +1,11 @@
 [![Build Status](https://cloud.drone.io/api/badges/buckket/pkgproxy/status.svg)](https://cloud.drone.io/buckket/pkgproxy)
 
-pkgproxy is a caching proxy server specifically designed for caching Arch GNU/Linux packages for pacman.
+**pkgproxy** is a caching proxy server specifically designed for caching Arch GNU/Linux packages for pacman.
 
-Updating multiple Arch systems in your home network can be a slow process if you have to download every package file
+Updating multiple Arch systems in your home network can be a slow process if you have to download every pkg file
 for every machine over and over again. One could setup a local Arch Linux mirror, but it takes a considerable amount of
 disk space (~60GB). Instead why not just cache packages you really downloaded on one machine since it’s highly likely that
-other computers will need to update the same packages. That’s exactly what `pkgproxy` does. It relays pacmans HTTP requests
+other computers will need to update the same packages. That’s exactly what pkgproxy does. It relays pacmans HTTP requests
 and saves a copy to disk so that future requests of the same file can be served from the local cache.
 
 ## Installation
@@ -37,6 +37,8 @@ Usage:
         Listen on addr (default ":8080")
     -upstream string
         Upstream URL (default "https://mirrors.kernel.org/archlinux/$repo/os/$arch")
+    -version bool
+        Show version information
 ```
 
 ## Limitations
@@ -49,3 +51,4 @@ Usage:
 ## License
 
  GNU GPLv3+
+ 

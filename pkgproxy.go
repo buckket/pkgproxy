@@ -11,6 +11,8 @@ Usage:
         Listen on addr (default ":8080")
     -upstream string
         Upstream URL (default "https://mirrors.kernel.org/archlinux/$repo/os/$arch")
+    -version bool
+        Show version information
 */
 package main
 
@@ -28,6 +30,8 @@ import (
 	"sync"
 	"time"
 )
+
+const version = "1.0.0"
 
 var CacheMap = make(map[string]string)
 var MutexMap = make(map[string]*sync.Mutex)
@@ -259,7 +263,13 @@ func main() {
 	flCachePath := flag.String("cache", "", "Cache base path")
 	flAddr := flag.String("port", ":8080", "Listen on addr")
 	flUpstream := flag.String("upstream", "https://mirrors.kernel.org/archlinux/$repo/os/$arch", "Upstream URL")
+	flShowVersion := flag.Bool("version", false, "Show version information")
 	flag.Parse()
+
+	if *flShowVersion {
+		fmt.Printf("pkgproxy %s\n", version)
+		return
+	}
 
 	if len(*flCachePath) > 0 {
 		GSettings.CacheDir = *flCachePath
