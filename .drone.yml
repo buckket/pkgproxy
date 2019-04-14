@@ -1,0 +1,15 @@
+workspace:
+  base: /go
+  path: src/github.com/buckket/pkgproxy
+
+pipeline:
+  test:
+    image: golang:latest
+    commands:
+      - go vet
+      - go test -v -cover
+  build:
+    image: golang:latest
+    commands:
+      - go build
+
