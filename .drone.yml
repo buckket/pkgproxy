@@ -1,0 +1,22 @@
+---
+kind: pipeline
+name: go-1-11
+
+steps:
+- name: test
+  image: golang:1.11
+  commands:
+  - go vet
+  - go test -v -cover
+
+---
+kind: pipeline
+name: go-1-10
+
+steps:
+- name: test
+  image: golang:1.10
+  commands:
+  - go vet
+  - go test -v -cover
+
