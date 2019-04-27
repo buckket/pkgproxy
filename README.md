@@ -1,4 +1,4 @@
-[![Build Status](https://cloud.drone.io/api/badges/buckket/pkgproxy/status.svg)](https://cloud.drone.io/buckket/pkgproxy)
+[![Build Status](https://drone.buckket.org/api/badges/buckket/pkgproxy/status.svg)](https://drone.buckket.org/buckket/pkgproxy)
 
 **pkgproxy** is a caching proxy server specifically designed for caching Arch GNU/Linux packages for pacman.
 
