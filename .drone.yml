@@ -9,14 +9,29 @@ steps:
   - go vet
   - go test -v -cover
 
+- name: build
+  image: golang:1.11
+  commands:
+  - go build
+
 ---
 kind: pipeline
-name: go-1-10
+name: go-1-12
 
 steps:
 - name: test
-  image: golang:1.10
+  image: golang:1.12
   commands:
   - go vet
   - go test -v -cover
 
+- name: build
+  image: golang:1.12
+  commands:
+  - go build
+
+---
+kind: signature
+hmac: 70d84e14304dcd49c19b02dad6d6053b5c0b516685ef13916b6603d2505dc25a
+
+...
