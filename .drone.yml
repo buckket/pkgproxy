@@ -1,15 +1,37 @@
-workspace:
-  base: /go
-  path: src/github.com/buckket/pkgproxy
+---
+kind: pipeline
+name: go-1-11
 
-pipeline:
-  test:
-    image: golang:latest
-    commands:
-      - go vet
-      - go test -v -cover
-  build:
-    image: golang:latest
-    commands:
-      - go build
+steps:
+- name: test
+  image: golang:1.11
+  commands:
+  - go vet
+  - go test -v -cover
 
+- name: build
+  image: golang:1.11
+  commands:
+  - go build
+
+---
+kind: pipeline
+name: go-1-12
+
+steps:
+- name: test
+  image: golang:1.12
+  commands:
+  - go vet
+  - go test -v -cover
+
+- name: build
+  image: golang:1.12
+  commands:
+  - go build
+
+---
+kind: signature
+hmac: 4244e6c73b31fde642184872bc211e364aabb088a5f2e2136f8701593e07153f
+
+...
