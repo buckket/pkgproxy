@@ -264,6 +264,7 @@ func main() {
 	flAddr := flag.String("port", ":8080", "Listen on addr")
 	flUpstream := flag.String("upstream", "https://mirrors.kernel.org/archlinux/$repo/os/$arch", "Upstream URL")
 	flShowVersion := flag.Bool("version", false, "Show version information")
+	flKeepCache := flag.Bool("keep-cache", false, "Keep the cache between restarts")
 	flag.Parse()
 
 	if *flShowVersion {
@@ -283,8 +284,10 @@ func main() {
 	GSettings.CacheDir = path.Join(GSettings.CacheDir, "pkgproxy")
 	GSettings.UpstreamServer = *flUpstream
 
-	setupCacheDir()
-	defer destroyCacheDir()
+	if !*flKeepCache {
+		setupCacheDir()
+		defer destroyCacheDir()
+	}
 
 	http.HandleFunc("/", handler)
 	log.Fatal(http.ListenAndServe(*flAddr, nil))
