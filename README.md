@@ -12,7 +12,7 @@ and saves a copy to disk so that future requests of the same file can be served 
 
 ### From source
 
-    go get -u github.com/buckket/pkgproxy
+    go get -u git.buckket.org/buckket/pkgproxy
 
 ### Packet manager
 
@@ -33,6 +33,8 @@ Usage:
   Options:
     -cache string
         Cache base path (default: $XDG_CACHE_HOME)
+    -keep-cache bool
+        Keep the cache between restarts
     -port string
         Listen on addr (default ":8080")
     -upstream string
