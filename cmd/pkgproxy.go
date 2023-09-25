@@ -55,7 +55,8 @@ type cacheEntry struct {
 
 	// The following fields should be accessed only after
 	// Started has been closed
-	HTTPInfo http.Header
+	HTTPStatus int
+	HTTPHeader http.Header
 }
 
 type request struct {
@@ -148,10 +149,11 @@ func newCacheEntryFromRequest(req *request) (*cacheEntry, error) {
 		return nil, err
 	}
 	return &cacheEntry{
-		RefCount: 1,
-		Complete: make(chan struct{}),
-		Started:  make(chan struct{}),
-		File:     util.NewConcurrentWORMSeekCloser(file),
+		RefCount:   1,
+		Complete:   make(chan struct{}),
+		Started:    make(chan struct{}),
+		File:       util.NewConcurrentWORMSeekCloser(file),
+		HTTPStatus: http.StatusInternalServerError,
 	}, nil
 }
 
@@ -208,11 +210,17 @@ func fileHandlerMissingOrUncacheable(w http.ResponseWriter, _ *http.Request, req
 	if err != nil {
 		log.Printf("(%s) Failed to query host, sending %q, error: %s", req.File, http.StatusText(http.StatusInternalServerError), err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		if req.CacheEntry != nil {
+			req.CacheEntry.HTTPStatus = http.StatusInternalServerError
+		}
 		return
 	} else if resp.StatusCode != http.StatusOK {
 		defer resp.Body.Close()
 		log.Printf("(%s) Host responded with %d (%s)", req.File, resp.StatusCode, http.StatusText(resp.StatusCode))
 		http.Error(w, http.StatusText(resp.StatusCode), resp.StatusCode)
+		if req.CacheEntry != nil {
+			req.CacheEntry.HTTPStatus = resp.StatusCode
+		}
 		return
 	}
 	defer resp.Body.Close()
@@ -233,7 +241,8 @@ func fileHandlerMissingOrUncacheable(w http.ResponseWriter, _ *http.Request, req
 		return
 	}
 
-	req.CacheEntry.HTTPInfo = w.Header().Clone()
+	req.CacheEntry.HTTPStatus = http.StatusOK
+	req.CacheEntry.HTTPHeader = w.Header().Clone()
 	close(req.CacheEntry.Started)
 
 	// Failed writes to the client are ignored so that caching can continue
@@ -263,8 +272,15 @@ func fileHandlerInDownload(w http.ResponseWriter, _ *http.Request, req *request)
 
 	<-req.CacheEntry.Started
 
-	for h, v := range req.CacheEntry.HTTPInfo {
+	for h, v := range req.CacheEntry.HTTPHeader {
 		w.Header()[h] = v
+	}
+	w.WriteHeader(req.CacheEntry.HTTPStatus)
+	if req.CacheEntry.HTTPStatus != http.StatusOK {
+		// Download goroutine failed
+		log.Printf("(%s) Error while serving file in download: download goroutine failed with status %d",
+			req.File, req.CacheEntry.HTTPStatus)
+		return
 	}
 
 	for !done {
@@ -338,6 +354,11 @@ func handleRequest(w http.ResponseWriter, r *http.Request, req *request) {
 	cacheCleaner := func(cache map[string]*cacheEntry) error {
 		if fileStatus == fileStatusMissing {
 			close(entry.Complete)
+			select {
+			case <-entry.Started:
+			default:
+				close(entry.Started)
+			}
 		}
 		entry.RefCount--
 		if entry.RefCount == 0 {
